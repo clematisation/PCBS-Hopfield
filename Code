@@ -1,0 +1,95 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import random as rd
+
+#create a checkerboard pattern
+checkerboard = np.zeros((10, 10))
+for i in range(10):
+    for j in range(10):
+        if i%2==0:
+            if j%2==0:
+                checkerboard[i][j]=-1
+            else:
+                checkerboard[i][j]=1
+        else:
+            if j%2==0:
+                checkerboard[i][j]=1
+            else:
+                checkerboard[i][j]=-1
+print(checkerboard)
+
+#create an L-shaped pattern
+lshaped = np.zeros((10, 10))
+for i in range(8):
+    for j in range(2):
+        lshaped[i][j]=-1
+    for j in range(2, 10):
+        lshaped[i][j]=1
+for i in range(8,10):
+    for j in range(10):
+        lshaped[i][j]=-1        
+print(lshaped)
+
+#create a square pattern
+square=np.zeros((10, 10))
+for i in range(2):
+    for j in range(10):
+        square[i][j]=-1
+for i in range(2, 8):
+    for j in range(2):
+        square[i][j]=-1
+    for j in range(2,8):
+        square[i][j]=1
+    for j in range(8,10):
+        square[i][j]=-1
+for i in range(8,10):
+    for j in range(10):
+        square[i][j]=-1
+print(square)
+
+#attribute a number to each neuron
+def number_neuron(matrix):
+    M=[0 for i in range(100)]
+    for n in range(10):
+        string=str(n)
+        M[n]=matrix[0][int(string)]
+    for n in range(10,100):
+        string=str(n)
+        M[n]=matrix[int(string[:1])][int(string[-1:])]
+    return M
+    
+Ncheckerboard=number_neuron(checkerboard)
+Nlshaped=number_neuron(lshaped)
+Nsquare=number_neuron(square)
+
+#store all these patterns in the synaptic weights matrix
+SWM=np.zeros((100,100))
+for i in range(100):
+    for j in range(100):
+        if i==j:
+            SWM[i][j]=0
+        else:
+            SWM[i][j]=0.01*((Ncheckerboard[i]*Ncheckerboard[j])+(Nlshaped[i]*Nlshaped[j])+(Nsquare[i]*Nsquare[j]))
+print(SWM)
+
+#display SWM
+fig, ax = plt.subplots()
+intersection_matrix = SWM
+ax.matshow(intersection_matrix, cmap=plt.cm.seismic)
+
+#create a noisy pattern
+def noisy(pattern, d):
+    for i in range(d):
+        x=rd.randint(0, 99)
+        pattern[x]=0
+    return pattern
+
+
+#create a noisy square
+NoisySquare=noisy(Nsquare, 20)
+
+#memory retrieval
+def overlap(pattern1, pattern2):
+    m=0.01
+def dynamics(pattern, steps, d):
+    initstate=noisy(pattern, d)

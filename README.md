@@ -247,6 +247,7 @@ def dynamics(pattern, Motifs, steps):
     h=0
     M=[]
     S=[]
+    L=[((i+1)/5) for i in range(len(Motifs))]
     number=len(pattern[0])
     initstate=convert(pattern)
     Weights=SynapticWM(Motifs)
@@ -257,7 +258,7 @@ def dynamics(pattern, Motifs, steps):
         m=overlap(initstate, p)
         M.append(m)
         S.append('Motif'+str(Motifs.index(p)))
-    ax1.bar(S, height=M) 
+    ax1.bar(L, tick_label=S, height=M)
     M=[]
     S=[]
     for s in range(steps):
@@ -272,7 +273,7 @@ def dynamics(pattern, Motifs, steps):
         fig, (ax0, ax1) = plt.subplots(1, 2)
         matrix = pattern
         ax0.imshow(matrix, cmap=plt.cm.spring)    
-        ax1.bar(S, height=M)
+        ax1.bar(L, tick_label=S, height=M)
         M=[]
         S=[]
                

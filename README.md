@@ -223,7 +223,7 @@ Le réseau de Hopfield est mis à jour selon la dynamique suivante :
 
 où <a href="https://www.codecogs.com/eqnedit.php?latex=$h_{i}(t)$" target="_blank"><img src="https://latex.codecogs.com/gif.latex?$h_{i}(t)$" title="$h_{i}(t)$" /></a> est le champ local du neurone i à t. Dès lors, l'état du neurone i se met à jour selon la formule :
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=$$S_{i}(t&plus;\Delta&space;t)=&space;sign(h_{i}(t))$$" target="_blank"><img src="https://latex.codecogs.com/gif.latex?$$S_{i}
+<a href="https://www.codecogs.com/eqnedit.php?latex=$$S_{i}(t&plus;\Delta&space;t)=&space;sign(h_{i}(t))$$" target="_blank"><img src="https://latex.codecogs.com/gif.latex?$$S_{i}(t&plus;\Delta&space;t)=&space;sign(h_{i}(t))$$" title="$$S_{i}(t+\Delta t)= sign(h_{i}(t))$$" /></a>
     
 Nous avons programmé cette mise à jour dans une fonction prenant pour arguments un stimulus bruité sous forme de matrice, la liste des stimuli et le nombre de mises à jour. Cette fonction permet aussi de visualiser la dynamique en affichant le motif mis à jour, ainsi que la corrélation de ce motif avec chacun des motifs stockés. Lorsque le réseau a reconnu le stimulus, la corrélation entre le motif mis à jour et le motif stocké auquel il correspond est égale à 1.
 

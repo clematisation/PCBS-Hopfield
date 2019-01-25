@@ -18,9 +18,11 @@ Dans ce projet, nous avons programmé des fonctions permettant de créer des sti
         - [Convertir des matrices en listes et inversement](#convertir)
     - [Programmation du réseau](#programmation-du-reseau)
         - [Matrice synaptique](#matrice-synaptique)
+        - [Dynamique du réseau](#dynamique)
         - [Essai avec un réseau 5x5](#essai-avec-un-reseau-5x5)
     - [Conclusion](#conclusion)
-    - [Références]
+    - [Références](#references)
+    - [Remarques finales](#remarques)
 
 <!-- markdown-toc end -->
 
@@ -213,7 +215,182 @@ def SynapticWM(Patterns):
     return SWM
     
 ```
+### Dynamique du réseau <a name="dynamique"></a>
+
+Le réseau de Hopfield est mis à jour selon la dynamique suivante :
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=$$h_{i}(t)=\sum_{j}{w_{ij}S_{j}(t)}$$" target="_blank"><img src="https://latex.codecogs.com/gif.latex?$$h_{i}(t)=\sum_{j}{w_{ij}S_{j}(t)}$$" title="$$h_{i}(t)=\sum_{j}{w_{ij}S_{j}(t)}$$" /></a>
+
+où <a href="https://www.codecogs.com/eqnedit.php?latex=$h_{i}(t)$" target="_blank"><img src="https://latex.codecogs.com/gif.latex?$h_{i}(t)$" title="$h_{i}(t)$" /></a> est le champ local du neurone i à t. Dès lors, l'état du neurone i se met à jour selon la formule :
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=$$S_{i}(t&plus;\Delta&space;t)=&space;sign(h_{i}(t))$$" target="_blank"><img src="https://latex.codecogs.com/gif.latex?$$S_{i}
+    
+Nous avons programmé cette mise à jour dans une fonction prenant pour arguments un stimulus bruité sous forme de matrice, la liste des stimuli et le nombre de mises à jour. Cette fonction permet aussi de visualiser la dynamique en affichant le motif mis à jour, ainsi que la corrélation de ce motif avec chacun des motifs stockés. Lorsque le réseau a reconnu le stimulus, la corrélation entre le motif mis à jour et le motif stocké auquel il correspond est égale à 1.
+
+Attention : la fonction qui calcule la corrélation entre deux motifs prend des motifs sous forme de liste en argument. 
+
+```
+import numpy as np
+import math
+import matplotlib.pyplot as plt
+
+#Cette fonction permet de calculer le taux de corrélation de l'état du réseau et des motifs stockés
+
+def overlap(pattern1, pattern2):
+    number=len(pattern1)
+    m=(1/number)*np.dot(pattern1, pattern2)
+    return m
+
+#Cette fonction correspond à la dynamique du réseau. Elle affiche le motif mis à jour ainsi que les taux de corrélation à chaque étape
+
+def dynamics(pattern, Motifs, steps):
+    h=0
+    M=[]
+    S=[]
+    number=len(pattern[0])
+    initstate=convert(pattern)
+    Weights=SynapticWM(Motifs)
+    fig, (ax0, ax1) = plt.subplots(1, 2)
+    matrix = pattern
+    ax0.imshow(matrix, cmap=plt.cm.spring)
+    for p in Motifs :
+        m=overlap(initstate, p)
+        M.append(m)
+        S.append('Motif'+str(Motifs.index(p)))
+    ax1.bar(S, height=M) 
+    M=[]
+    S=[]
+    for s in range(steps):
+        for i in range(len(initstate)):
+            h=np.dot(Weights[i], initstate)
+            initstate[i]=np.sign(h)
+        for p in Motifs :
+            m=overlap(initstate, p)
+            M.append(m)
+            S.append('Motif'+str(Motifs.index(p)))
+        pattern=convert_lm(initstate)
+        fig, (ax0, ax1) = plt.subplots(1, 2)
+        matrix = pattern
+        ax0.imshow(matrix, cmap=plt.cm.spring)    
+        ax1.bar(S, height=M)
+        M=[]
+        S=[]
+               
+```
 
 ### Essai avec un réseau 5x5 <a name="essai-avec-un-reseau-5x5"></a>
 
+Enfin, nous avons testé notre programme sur un réseau de 5x5 neurones. Tout d'abord, nous avons créé quatre motifs 5x5 : un damier, un carré, une croix et un L.
 
+```
+import numpy as np
+import matplotlib.pyplot as plt
+
+#On crée quatre motifs de taille 5x5 grâce aux fonctions précédentes
+
+Damier5=checkerboard(5)
+MotifL5=lshaped(5)
+Carre5=square(5)
+Croix5=cross(5)
+
+#On affiche les quatre motifs
+
+fig, (ax0, ax1, ax2, ax3) = plt.subplots(1, 4)
+matrix1 = Damier5
+matrix2 = MotifL5
+matrix3 = Carre5
+matrix4 = Croix5
+ax0.imshow(matrix1, cmap=plt.cm.spring)
+ax1.imshow(matrix2, cmap=plt.cm.spring)
+ax2.imshow(matrix3, cmap=plt.cm.spring)
+ax3.imshow(matrix4, cmap=plt.cm.spring)
+fig.suptitle('Motifs')
+```
+
+![Motifs créés](motifs.jpg)
+
+Puis on convertit ces motifs sous forme de liste, on les stocke dans une liste de motifs, et l'on affiche notre matrice synaptique :
+
+```
+import math
+import numpy as np
+import matplotlib.pyplot as plt 
+
+#On convertit chaque motif sous forme de liste
+
+Liste_Damier5=convert(Damier5)  
+Liste_MotifL5=convert(MotifL5)  
+Liste_Carre5=convert(Carre5)  
+Liste_Croix5=convert(Croix5) 
+
+#On crée une liste de motifs
+
+Liste_Motifs=[Liste_Damier5, Liste_MotifL5, Liste_Carre5, Liste_Croix5]
+
+#On calcule la matrice des poids synaptiques
+
+Weights = SynapticWM(Liste_Motifs)
+
+#On affiche la matrice des poids synaptiques
+
+fig, ax = plt.subplots()
+matrix = Weights
+ax.imshow(matrix, cmap=plt.cm.viridis)
+plt.title("Matrice des poids synaptiques")
+plt.xlabel("neurone i")
+plt.ylabel("neurone j")
+cb = plt.colorbar(ax.imshow(matrix, cmap=plt.cm.viridis))
+plt.show()
+
+```
+![Matrice des poids synaptiques](matrice-synaptique.jpg)
+
+Ensuite, on bruite le motif en L : trois pixels aléatoires sont bruités.
+
+```
+import random as rd
+import math
+import matplotlib.pyplot as plt
+import numpy as np
+
+#On bruite notre motif en L
+
+MotifL_Bruite=noisy(MotifL5, 3)
+
+#On affiche notre motif bruité
+
+fig, ax = plt.subplots()
+matrix = MotifL_Bruite
+ax.imshow(matrix, cmap=plt.cm.viridis)
+plt.title("Motif bruité")
+cb = plt.colorbar(ax.imshow(matrix, cmap=plt.cm.spring))
+plt.show()
+```
+![Motif bruité](motif-bruite.jpg)
+
+Enfin, on fait tourner la dynamique du réseau. Nous lui avons fait faire 5 étapes, mais le réseau reconnaît notre motif au bout de la deuxième étape.
+
+```
+import math
+import matplotlib.pyplot as plt
+import numpy as np
+import random as rd
+
+print(dynamics(MotifL_Bruite, Liste_Motifs, 5))
+```
+![Dynamique](dynamique.jpg)
+
+## Conclusion <a name="conclusion"></a>
+
+Dans le cadre de ce projet, j'ai programmé des stimuli visuels ainsi qu'un réseau de Hopfield reconnaissant ces stimuli. Mon essai avec un réseau 5x5 et des stimuli représentant des formes simples a très bien fonctionné. Malheureusement, je n'ai pas eu le temps de tester certains paramètres comme la capacité de stockage du réseau, ou bien sa dynamique lorsque les motifs stockés sont fortement corrélés. Cependant, le programme que j'ai écrit me fournit une très bonne base pour tester ces paramètres. 
+
+## Références <a name="references"></a>
+
+Je me suis familiarisée avec les réseaux de Hopfield grâce à ce site : https://neuronaldynamics.epfl.ch/online/Ch17.S2.html 
+Pour la rédaction du fichier README, je me suis inspirée du code de Christophe Pallier : https://github.com/chrplr/PCBS 
+
+## Remarques finales <a name="remarques"></a>
+
+En ce qui concerne mon niveau en programmation, j'ai suivi un cours d'initiation à Python en première année de classes préparatoires MPSI il y a trois ans.
+
+Les notions que j'y ai apprises étaient plutôt abstraites, et ce cours m'a permis de les appliquer dans un cadre plus concret - celui des sciences cognitives. J'ai également appris à utiliser pygame, qui n'était pas au programme de la MPSI quand j'y ai étudié la programmation. 
